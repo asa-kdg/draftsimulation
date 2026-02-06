@@ -1,0 +1,227 @@
+/* 全体レイアウト */
+.player-detail {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+/* 戻るナビゲーションのエリア */
+.back-nav {
+    margin-bottom: 20px;
+}
+
+/* リンクをボタン風に装飾 */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: #555;
+    font-weight: bold;
+    font-size: 0.95rem;
+    transition: color 0.2s, transform 0.2s;
+}
+
+/* 矢印に少し動きをつける */
+.back-link .arrow {
+    margin-right: 8px;
+    font-size: 1.2rem;
+    transition: transform 0.2s;
+}
+
+/* ホバー時にちょっと左に動く演出（プロっぽい！） */
+.back-link:hover {
+    color: #007bff;
+}
+
+.back-link:hover .arrow {
+    transform: translateX(-5px);
+}
+
+/* ヘッダーエリア */
+.player-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.badge {
+    background: #e9ecef;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    color: #495057;
+}
+
+.scout-avg-box {
+    text-align: center;
+    background: #f8f9fa;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+
+.avg-label { font-size: 0.9em; color: #666; }
+.avg-value { font-size: 2.5em; font-weight: bold; color: #d9534f; }
+
+/* メイン2カラムエリア */
+.player-main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* 共通カードスタイル */
+.player-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.intro-card {
+    flex-grow: 0; /* 勝手に伸びないようにする */
+    min-height: 150px; /* スカスカ防止の最低限の高さ */
+}
+
+/* テーブルスタイル */
+.info-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.info-table th {
+    padding: 10px;
+    text-align: left;
+    color: #666;
+    font-weight: normal;
+    border-bottom: 1px solid #eee;
+}
+
+.info-table td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+/* チャートエリア */
+.chart-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+}
+
+canvas {
+    max-height: 100%; /* 親の 350px を超えないようにする */
+    max-width: 100%;
+}
+
+/* 評価投稿フォーム */
+.evaluation-form {
+    background: #fdfdfd;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    margin-top: 10px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.range-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.range-input {
+    flex-grow: 1;
+}
+
+.range-val {
+    font-weight: bold;
+    width: 30px;
+    color: #007bff;
+}
+
+.submit-btn {
+    background: #007bff;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 1em;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.submit-btn:hover {
+    background: #0056b3;
+}
+
+/* コメント一覧 */
+.comment-item {
+    border-bottom: 1px solid #eee;
+    padding: 10px 0;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.comment-rank {
+    color: #d9534f;
+    font-weight: bold;
+}
+
+.muted {
+    color: #888;
+    font-size: 0.85em;
+}
+
+/* どんな設定よりも優先してスライダーを横いっぱいに広げる */
+.range-input input[type="range"],
+.player-detail input[type="range"] {
+    display: block !important;
+    width: 100% !important; /* 横幅を強制的に100%に */
+    height: 12px !important;  /* 棒を太くして掴みやすく */
+    margin: 15px 0 !important;
+    cursor: pointer !important;
+    -webkit-appearance: auto !important; /* ブラウザ標準の見た目を強制 */
+    appearance: auto !important;
+}
+
+/* スライダーを包んでいる箱も広げる */
+.range-input {
+    width: 100% !important;
+    flex: 1 !important;
+}
+
+ 
+
+/* レスポンシブ対応（スマホで縦並びにする） */
+@media (max-width: 768px) {
+    .player-main {
+        grid-template-columns: 1fr;
+    }
+    .player-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+}

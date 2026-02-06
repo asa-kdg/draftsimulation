@@ -1,0 +1,67 @@
+{% extends 'draft/base.html' %}
+{% block title %}トップ{% endblock %}
+
+{% block content %}
+
+<form method="get" action="{% url 'draft:index' %}" style="margin-bottom:20px;">
+    <input
+      type="text"
+      name="q"
+      placeholder="選手名・所属で検索"
+      value="{{ request.GET.q }}"
+      style="padding:6px; width:250px;"
+    >
+    <button type="submit">検索</button>
+</form>
+
+<div class="tabs">
+  <button class="tab-btn active" data-target="HS">高校生</button>
+  <button class="tab-btn" data-target="UNIV">大学生</button>
+  <button class="tab-btn" data-target="IND">独立・社会人</button>
+</div>
+
+
+  
+{% for category in grouped_list %}
+  <section class="tab-content {% if category.id != 'HS' %}hidden{% endif %}"
+  id="tab-{{ category.id }}" style="margin-bottom: 40px;">
+
+    <h2>
+      {% if category.id == 'HS' %}高校生
+      {% elif category.id == 'UNIV' %}大学生
+      {% else %}独立・社会人{% endif %}
+    </h2>
+
+    {% for pos_data in category.positions %}
+      <h3>
+        {% if pos_data.id == 'P' %}投手
+        {% elif pos_data.id == 'C' %}捕手
+        {% elif pos_data.id == 'IF' %}内野手
+        {% else %}外野手{% endif %}
+      </h3>
+
+      <table border="1" cellpadding="6" cellspacing="0" width="100%">
+        <thead>
+          <tr>
+            <th>名前</th>
+            <th>所属</th>
+            <th>投打</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in pos_data.players %}
+            <tr>
+              <td>
+                <a href="{% url 'draft:detail' p.id %}">{{ p.name }}</a>
+              </td>
+              <td>{{ p.team }}</td>
+              <td>{{ p.get_bats_throws_display }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endfor %}
+  </section>
+{% endfor %}
+{% endblock %}
+

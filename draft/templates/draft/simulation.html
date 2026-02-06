@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ドラフトシミュレーション</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 24px;
+    }
+
+    h1 {
+      margin-bottom: 24px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+
+    .team-box {
+      background: #e5e5e5;
+      padding: 12px;
+      min-height: 160px;
+    }
+
+    .team-name {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .pick {
+      font-size: 14px;
+      margin: 2px 0;
+    }
+
+    .players {
+      margin-bottom: 48px;
+    }
+
+    .player-row {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #ccc;
+      padding: 6px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: center;
+    }
+
+    th {
+      background: #f0f0f0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>第{{ round }}巡目 ドラフトシミュレーション</h1>
+
+  <!-- ===== ドラフト盤 ===== -->
+  <div class="board">
+    {% for team in teams %}
+      <div class="team-box">
+        <div class="team-name">{{ team.name }}</div>
+
+        {# ここに後で指名済み選手を表示 #}
+        {% comment %} 
+        {% for pick in team.picks %}
+          <div class="pick">{{ pick.player.name }}</div>
+        {% endfor %}
+        {% endcomment %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- ===== 指名候補 ===== -->
+  <div class="players">
+    <h2>指名候補選手</h2>
+
+    <form method="post" action="{% url 'draft:pick_player' %}">
+      {% csrf_token %}
+
+      {% for player in players %}
+        <div class="player-row">
+          <span>
+            {{ player.name }}
+            {% if player.position %}
+              （{{ player.position }}）
+            {% endif %}
+          </span>
+
+          <button type="submit" name="player_id" value="{{ player.id }}">
+            指名
+          </button>
+        </div>
+      {% empty %}
+        <p>指名可能な選手がいません</p>
+      {% endfor %}
+    </form>
+  </div>
+
+  <!-- ===== 指名履歴（仮） ===== -->
+  <h2>指名履歴</h2>
+  <table>
+    <tr>
+      <th>巡目</th>
+      <th>球団</th>
+      <th>選手</th>
+    </tr>
+
+    {% comment %}
+    {% for pick in picks %}
+      <tr>
+        <td>{{ pick.round }}</td>
+        <td>{{ pick.team.name }}</td>
+        <td>{{ pick.player.name }}</td>
+      </tr>
+    {% endfor %}
+    {% endcomment %}
+  </table>
+
+</body>
+</html>

@@ -1,0 +1,168 @@
+{% extends 'draft/base.html' %}
+{% load static %}
+
+{% block title %}{{ player.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="back-nav">
+  <a href="{% url 'draft:index' %}" class="back-link">
+    <span class="arrow">←</span> 選手一覧に戻る
+  </a>
+</div>
+
+<div class="player-detail">
+
+    <div class="player-header">
+      <div>
+        <h1>{{ player.name }}</h1>
+        <span class="badge">
+          {{ player.get_category_display }} / {{ player.get_position_display }}
+        </span>
+      </div>
+      <div class="scout-avg-box">
+        <div class="avg-label">スカウト総合評価</div>
+        <div class="avg-value">{{ avg_rank }}</div>
+      </div>
+    </div>
+  
+    <div class="player-main">
+      <div class="left-column">
+        <div class="player-card">
+          <h3>基本情報</h3>
+          <table class="info-table">
+            <tr><th>所属</th><td>{{ player.team }}</td></tr>
+            <tr><th>投打</th><td>{{ player.get_bats_throws_display }}</td></tr>
+            <tr><th>身長</th><td>{{ player.height }} cm</td></tr>
+            <tr><th>体重</th><td>{{ player.weight }} kg</td></tr>
+          </table>
+        </div>
+
+        <div class="player-card intro-card">
+          <h3>選手紹介</h3><br>
+          {% if player.introduction %}   
+            <p>{{ player.introduction }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="right-column">
+        <div class="player-card" style="height: 100%; display: flex; flex-direction: column;">
+          <h3>能力分析チャート</h3>
+          <div class="chart-wrapper">
+            <canvas id="radarChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="player-card" style="margin-top: 20px;">
+      <h3>評価を投稿する</h3>
+      <form method="post" class="evaluation-form">
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="form-group">
+            <label class="form-label">{{ field.label }}</label>
+            <div class="range-container">
+              <div class="range-input">{{ field }}</div>
+              {% if field.field.widget.attrs.type == 'range' %}
+                <span id="val_{{ field.id_for_label }}" class="range-val">
+                  {{ field.value|default:"3.0" }}
+                </span>
+                <script>
+                  (function() {
+                    const slider = document.getElementById('{{ field.id_for_label }}');
+                    const output = document.getElementById('val_{{ field.id_for_label }}');
+                    
+                    // 初期値をセット
+                    output.innerHTML = Number(slider.value).toFixed(1);
+          
+                    // 動かした時にリアルタイム更新
+                    slider.oninput = function() {
+                      output.innerHTML = Number(this.value).toFixed(1);
+                    };
+                  })();
+                </script>
+               
+              {% endif %}
+            </div>
+            {% if field.errors %}<div>{{ field.errors }}</div>{% endif %}
+          </div>
+        {% endfor %}
+        <button type="submit" class="submit-btn">評価を送信する</button>
+      </form>
+    </div>
+
+    <div class="player-card" style="margin-top:20px;">
+      <h3>スカウトコメント一覧</h3>
+      {% for c in player.comments.all %}
+        <div class="comment-item">
+          <div class="comment-header">
+            <span class="comment-rank">ランク: {{ c.rank }}</span>
+            <small class="muted">{{ c.created_at|date:"Y-m-d H:i" }}</small>
+          </div>
+          <p>{{ c.text }}</p>
+        </div>
+      {% empty %}
+        <p class="muted">まだコメントはありません</p>
+      {% endfor %}
+    </div>
+  
+</div>
+
+<script>
+const ctx = document.getElementById('radarChart');
+
+{% if player.position == 'P' %}
+    const labels = ['球速', '制球', '変化球', 'フォーム', '将来性'];
+    const dataValues = [{{ averages.avg_velocity|default:0 }}, {{ averages.avg_command|default:0 }}, {{ averages.avg_breakingball|default:0 }}, {{ averages.avg_mechanics|default:0 }}, {{ averages.avg_potential|default:0 }}];
+{% else %}
+    const labels = ['ミート', 'パワー', '走力', '守備', '将来性'];
+    const dataValues = [{{ averages.avg_batcontroll|default:0 }}, {{ averages.avg_power|default:0 }}, {{ averages.avg_speed|default:0 }}, {{ averages.avg_defense|default:0 }}, {{ averages.avg_potential|default:0 }}];
+{% endif %}
+
+new Chart(ctx, {
+    type: 'radar',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'スカウト平均値',
+            data: dataValues,
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgb(54, 162, 235)',
+            borderWidth: 2,
+            pointBackgroundColor: 'rgb(54, 162, 235)',
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+        r: {
+            min: 1,
+            max: 5,
+            ticks: { 
+                stepSize: 1, 
+                display: false },
+            // ↓ ここを追加：項目名（ラベル）のスタイル設定
+            pointLabels: {
+                font: {
+                    size: 16,        // 文字サイズを大きく（デフォルトは12くらい）
+                    weight: 'bold'   // 太字にするとさらに見やすい
+                       },
+                color: '#333'        // 文字色をハッキリさせる
+                          }
+        }
+    },
+        plugins: {
+            legend: { display: false }
+        }
+    }
+});
+</script>
+{% endblock %}

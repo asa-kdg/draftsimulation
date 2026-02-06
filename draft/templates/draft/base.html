@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}2026 Draft{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_css %}{% endblock %} 
+</head>
+<body>
+
+  <header>
+    <a href="{% url 'draft:index' %}" style="display: block;">
+      <img class="header-logo" src="{% static 'images/logo_wh.jpg' %}" alt="2026ドラフトロゴ">
+    </a>
+    
+    <nav>
+      <ul>
+          <li class="list1"><a href="{% url 'draft:simulation_start' %}">ドラフトシミュレーション</a></li>
+          <li class="list2"><a href="#">ログイン/登録</a></li>  
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <span>© 2026 Drafy</span>
+  </footer>
+
+  <script>
+    // タブのスクリプトはここ（共通）にあれば、IndexでもDetailでも使いまわせて便利です
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        const target = document.getElementById('tab-' + btn.dataset.target);
+        if (target) target.classList.remove('hidden');
+      });
+    });
+  </script>
+</body>
+</html>
