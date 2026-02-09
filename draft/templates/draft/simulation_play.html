@@ -18,7 +18,7 @@
 
     <div class="draft-grid">
         {% for t in teams %}
-        <div class="team-card {% if t.name == team.name %}active{% endif %}">
+        <div class="team-card {% if t.name == team.name %}active{% endif %}" >
             
             <div class="team-line-top" style="background-color: {{ t.first_color|default:'#ccc' }};"></div>
     
@@ -40,6 +40,18 @@
                         onclick="document.getElementById('playerModal').style.display='block'; document.body.style.overflow='hidden';" 
                         class="submit-btn">選手を選択する
                 </button>
+                {% if request.session.draft_phase != "1st_round" %}
+                <form method="post" action="{% url 'draft:skip_team' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="skip-btn" 
+                    onmouseover="this.style.background='#dc3545'; 
+                    this.style.color='#fff';"
+                    onmouseout="this.style.background='#fff'; 
+                    this.style.color='#dc3545';"
+                    onclick="return confirm('指名を終了（選択終了）しますか？')">指名を終了する
+                    </button>
+                </form>
+                {% endif %}
             </div>
             {% endif %}
     
@@ -68,11 +80,14 @@
 
             <div id="playerList" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 {% for p in players %}
-                <label class="player-card category-{{ p.team_category }}" 
-                       data-name="{{ p.name }}" data-team="{{ p.team }}"
-                       style="display: block; position: relative; border: 1px solid #ddd; border-radius: 8px; padding: 12px; cursor: pointer; background: #fff;">
-                    <input type="radio" name="player_id" value="{{ p.id }}" required style="position: absolute; top: 12px; right: 12px; transform: scale(1.3);">
-                    <div style="pointer-events: none;">
+                <label class="player-card category-{{ p.team_category }}" data-name="{{p.name}}" data-team="{{p.team}}" ...>
+                    <span class="rank-badge rank-{{ p.display_rank|default:'None' }}" >
+                        {{ p.display_rank|default:"-" }}
+                    </span>
+                
+                    <input type="radio" name="player_id" value="{{ p.id }}" ...>
+                    
+                    <div style="pointer-events: none; margin-left: 35px;">
                         <span class="pos-badge pos-{{ p.position }}">{{ p.get_position_display }}</span>
                         <div>
                             <strong>{{ p.name }}</strong><br>
@@ -114,3 +129,29 @@
     }
 </script>
 {% endblock %}
+
+// simulation.html の末尾にある <script> 内
+
+    // 選手カードがクリックされた時のイベント
+    document.querySelectorAll('.player-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const playerName = this.getAttribute('data-name');
+            const playerRank = this.querySelector('.rank-badge').innerText;
+            
+            // 現在操作中のチームカードを探す
+            const activeTeamCard = document.querySelector('.team-card.active');
+            
+            if (activeTeamCard) {
+                const teamId = activeTeamCard.id.replace('team-', '');
+                const bidDisplay = document.getElementById(`bid-name-${teamId}`);
+                
+                // 仮表示を更新（アニメーション付きで書き換えるとカッコいい）
+                bidDisplay.style.opacity = 0;
+                setTimeout(() => {
+                    bidDisplay.innerHTML = `[${playerRank}] ${playerName}`;
+                    bidDisplay.style.opacity = 1;
+                    bidDisplay.style.color = "#e91e63"; // 入札中は目立つ色に
+                }, 150);
+            }
+        });
+    });

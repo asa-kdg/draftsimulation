@@ -176,3 +176,52 @@
     font-weight: bold;
     cursor: pointer;
 }
+
+.skip-btn{
+    width: 100%; 
+    margin-top: 5px;
+    background: #fff; 
+    border: 1px solid #dc3545; 
+    color: #dc3545; 
+    padding: 8px; 
+    border-radius: 25px; 
+    font-size: 0.85em; 
+    cursor: pointer; 
+    font-weight: bold; 
+    transition: all 0.2s;
+}
+
+/* --- 修正版 ランクバッジ --- */
+.rank-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    /* color: #000; ← ここで色を固定してはいけません */
+    position: absolute;
+    top: 12px; 
+    left: 12px; 
+    font-weight: bold; 
+    font-size: 1.2rem;
+    z-index: 1; /* 背景に埋もれないように */
+}
+
+/* クラスを2つつなげて詳細度を高くし、!importantで確実に上書きします */
+.rank-badge.rank-S { background-color: #ffe5e5 !important; color: #d00000 !important; border: 1px solid #d00000 !important; }
+.rank-badge.rank-A { background-color: #fff4e5 !important; color: #ff8c00 !important; border: 1px solid #ff8c00 !important; }
+.rank-badge.rank-B { background-color: #e5f4e5 !important; color: #228b22 !important; border: 1px solid #228b22 !important; }
+.rank-badge.rank-C { background-color: #e5f0ff !important; color: #0000ff !important; border: 1px solid #0000ff !important; }
+.rank-badge.rank-D { background-color: #f0f0f0 !important; color: #666666 !important; border: 1px solid #666666 !important; }
+.rank-badge.rank-- { background-color: #f8f9fa !important; color: #ccc !important; border: 1px solid #ddd !important; }
+
+/* 入札中の名前がふわっと出るアニメーション */
+.bid-name {
+    transition: all 0.3s ease;
+    border-bottom: 2px dashed #ddd;
+    padding-bottom: 5px;
+}
+
+/* 操作中のチームの入札エリアを強調 */
+.team-card.active .bid-area {
+    background-color: #fff9c4; /* ほんのり黄色くして「入力中」を強調 */
+    border-radius: 4px;
+}

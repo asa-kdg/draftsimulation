@@ -4,14 +4,13 @@
 {% block content %}
 
 <form method="get" action="{% url 'draft:index' %}" style="margin-bottom:20px;">
-    <input
-      type="text"
-      name="q"
-      placeholder="選手名・所属で検索"
-      value="{{ request.GET.q }}"
-      style="padding:6px; width:250px;"
-    >
-    <button type="submit">検索</button>
+  <input
+  type="text"
+  name="q"
+  placeholder="選手名・所属・ポジション（投手など）で検索"
+  value="{{ request.GET.q }}"
+  style="padding:6px; width:300px;">
+  <button type="submit">検索</button>
 </form>
 
 <div class="tabs">

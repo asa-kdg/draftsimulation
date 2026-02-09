@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Player, Team, Pick, Comment
-from django.db.models import Q, Avg
+from django.db.models import Q, Avg, Case, When, IntegerField, Value, CharField, FloatField
 from .simulation import DraftManager
 from .forms import CommentForm
 
@@ -11,10 +11,29 @@ def index(request):
     players = Player.objects.all()
 
     if q:
-        players = players.filter(
-            Q(name__icontains=q) |
-            Q(team__icontains=q)
-        )
+        # 1. 日本語の検索ワードをコードに変換するマップ
+        pos_map = {
+        '投手': 'P',
+        '捕手': 'C',
+        '内野手': 'IF',
+        '外野手': 'OF',
+        }
+    
+        pos_code = pos_map.get(q)
+
+        # 2. クエリの組み立て
+        # 名前か所属にキーワードが含まれているか
+        query = Q(name__icontains=q) | Q(team__icontains=q)
+
+        if pos_code:
+            # 「外野手」と打たれたら、DBの「OF」を直接狙い撃ち
+            query |= Q(position__iexact=pos_code)
+        else:
+            # それ以外（"P"や"捕手"以外の文字など）は部分一致で検索
+            query |= Q(position__icontains=q)
+
+        # 3. 最後に一回だけフィルターをかける（上書きしない！）
+        players = players.filter(query)
 
     # 1. 表示したいカテゴリとポジションの順序を定義
     category_order = ['HS', 'UNIV', 'IND']
@@ -134,7 +153,30 @@ def simulation_play(request):
         idx = request.session["current_team_index"]
         current_team = Team.objects.get(id=team_ids[idx])
 
-    players = Player.objects.exclude(id__in=picked_ids)
+    players = Player.objects.exclude(id__in=picked_ids).annotate(
+        # ランクを数値に置換して平均を出す
+        avg_rank_num=Avg(
+            Case(
+                When(comments__rank='S', then=Value(5.0)),
+                When(comments__rank='A', then=Value(4.0)),
+                When(comments__rank='B', then=Value(3.0)),
+                When(comments__rank='C', then=Value(2.0)),
+                When(comments__rank='D', then=Value(1.0)),
+                output_field=FloatField(),
+            )
+        )
+    ).annotate(
+        # 平均値に基づいてランク文字を決める
+        display_rank=Case(
+            When(avg_rank_num__gte=4.5, then=Value('S')),
+            When(avg_rank_num__gte=3.5, then=Value('A')),
+            When(avg_rank_num__gte=2.5, then=Value('B')),
+            When(avg_rank_num__gte=1.5, then=Value('C')),
+            When(avg_rank_num__gt=0, then=Value('D')),
+            default=Value('-'),
+            output_field=CharField(),
+        )
+    ).order_by('-avg_rank_num', 'name') # 高い順
 
     # 画面右側の指名リスト作成
     teams_with_picks = []
